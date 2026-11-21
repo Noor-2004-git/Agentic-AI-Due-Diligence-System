@@ -19,7 +19,7 @@ Manually collecting and analyzing this information is time-consuming and often i
 
 This project solves this problem by building an **Agentic AI Due Diligence Consultant**, where multiple specialized AI agents collaborate to generate a comprehensive due diligence report.
 
-The system leverages **LangGraph** for agent orchestration, **Hybrid Retrieval-Augmented Generation (Hybrid RAG)** for document intelligence, and **Large Language Models (Groq Llama 3.3 70B)** for reasoning and report generation.
+The system leverages **LangGraph** for agent orchestration, **Hybrid Retrieval-Augmented Generation (Hybrid RAG)** for document intelligence, and **Large Language Models (Groq, `openai/gpt-oss-120b`)** for reasoning and report generation.
 
 ---
 
@@ -36,7 +36,7 @@ The system leverages **LangGraph** for agent orchestration, **Hybrid Retrieval-A
 - ✅ Hybrid RAG using Company Annual Reports
 - ✅ FAISS Vector Database
 - ✅ HuggingFace Sentence Transformers
-- ✅ Groq Llama 3.3 70B Integration
+- ✅ Groq LLM Integration (`openai/gpt-oss-120b`, configurable)
 - ✅ Tavily Search Integration
 - ✅ Yahoo Finance Integration
 - ✅ Streamlit Web Application
@@ -127,7 +127,7 @@ This project automates the entire workflow by orchestrating multiple AI agents t
 
                                           ▼
 
-                               Groq Llama 3.3 70B
+                               Groq LLM (gpt-oss-120b)
 
                                           │
 
@@ -169,8 +169,7 @@ This project automates the entire workflow by orchestrating multiple AI agents t
 
 ## Large Language Model
 
-- Groq
-- Llama 3.3 70B Versatile
+- Groq (`openai/gpt-oss-120b`, set `GROQ_MODEL` to change)
 
 ---
 
@@ -203,10 +202,11 @@ This project automates the entire workflow by orchestrating multiple AI agents t
 ## Other Libraries
 
 - PyPDF
-- dotenv
-- requests
-- pandas
+- python-dotenv
 - yfinance
+- Groq SDK
+- FastAPI
+- sentence-transformers
 # 📂 Project Structure
 
 ```
@@ -228,6 +228,10 @@ agentic-ai-due-diligence/
 
 │ ├── tools/
 
+│ ├── data/documents/   (uploaded PDFs)
+
+│ └── main.py   (FastAPI /chat endpoint)
+
 │
 
 ├── frontend/
@@ -238,13 +242,11 @@ agentic-ai-due-diligence/
 
 ├── data/
 
-│ └── documents/
+│ └── reports/embeddings/documents/   (sample PDFs)
 
 │
 
-├── screenshots/
-
-│
+├── test.py / test_groq.py / version_test.py
 
 ├── requirements.txt
 
@@ -274,7 +276,7 @@ The Planner Agent analyzes the query and determines which specialist agents are 
 
 ## Step 3
 
-The Executor dynamically invokes the selected agents.
+The Executor dynamically invokes the selected agents, one after another.
 
 ---
 
@@ -301,7 +303,7 @@ Each agent performs its specific task:
 
 ### ⚖️ Legal Agent
 
-Uses Hybrid RAG.
+Uses Hybrid RAG (annual-report PDF retrieval via FAISS combined with live web search).
 
 Sources:
 
@@ -337,7 +339,7 @@ Combines outputs from all agents into a structured Due Diligence Report.
 Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/agentic-ai-due-diligence.git
+git clone https://github.com/Noor-2004-git/agentic-ai-due-diligence.git
 ```
 
 Move inside the project
@@ -346,7 +348,7 @@ Move inside the project
 cd agentic-ai-due-diligence
 ```
 
-Create virtual environment
+Create virtual environment (Python 3.10 - 3.13)
 
 ```bash
 python -m venv venv
@@ -372,11 +374,13 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
-Create a `.env` file
+Create a `.env` file (copy `.env.example`: `copy .env.example .env` on Windows, `cp .env.example .env` on Linux/macOS) and add your keys
 
 ```env
 GROQ_API_KEY=your_key
 TAVILY_API_KEY=your_key
+# optional: override the default model
+# GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 Run Streamlit
@@ -384,6 +388,11 @@ Run Streamlit
 ```bash
 streamlit run frontend/app.py
 ```
+
+> **Notes**
+> - The first run downloads the `all-MiniLM-L6-v2` embedding model, so internet access is required.
+> - On Groq's free tier a full run may pause and retry because of the tokens-per-minute limit. This is handled automatically.
+
 # 🚀 Future Enhancements
 
 - Persistent FAISS Indexing
@@ -428,7 +437,7 @@ Feel free to fork the repository and submit a Pull Request.
 
 # 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License (see `LICENSE`).
 
 ---
 
